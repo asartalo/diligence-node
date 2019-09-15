@@ -1,0 +1,22 @@
+{
+  "name": "diligence",
+  "version": "0.1.0",
+  "description": "Personal productivity",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "productivity"
+  ],
+  "author": "Wayne Duran",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asartalo/diligence.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asartalo/diligence/issues"
+  },
+  "homepage": "https://github.com/asartalo/diligence#readme"
+}
