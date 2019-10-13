@@ -1,9 +1,7 @@
-import { By } from 'selenium-webdriver';
-import { createServer } from './server';
+import path from 'path';
+import createServer from './createServer';
 import firefox from './firefox';
 import chrome from './chrome';
-// import chromeStart from './support/chromeStart';
-import path from 'path';
 
 class XtTester {
   constructor() {
@@ -14,16 +12,16 @@ class XtTester {
   }
 
   async start() {
-    console.log("Starting x");
+    console.log('Starting x');
     this.server.start();
     const { selenium, server, extension } = this;
     await Promise.all([firefox, chrome].map(
-      browserFn => browserFn({ selenium, server, extension })
+      browserFn => browserFn({ selenium, server, extension }),
     ))
       .then(browsers => browsers.forEach(
-        browser => this.browsers.push(browser)
+        browser => this.browsers.push(browser),
       ));
-    return "DONE";
+    return 'DONE';
   }
 
   stop() {
@@ -32,7 +30,7 @@ class XtTester {
   }
 
   run(fn) {
-    return Promise.all(this.browsers.map(browser => fn(browser)))
+    return Promise.all(this.browsers.map(browser => fn(browser)));
   }
 }
 

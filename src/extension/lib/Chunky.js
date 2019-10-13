@@ -12,7 +12,7 @@ class Chunky {
     return this.elements.length;
   }
 
-  *chunks() {
+  * chunks() {
     while (this.size > 0) {
       yield this.elements.splice(0, this.chunkSize);
     }
@@ -20,4 +20,3 @@ class Chunky {
 }
 
 export default Chunky;
-

@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha ./src/**/*.test.js --require=esm",
+    "test-watch": "mocha --watch ./src/**/*.test.js --require=esm",
     "install-selenium": "selenium-standalone install",
     "selenium-start": "selenium-standalone start",
-    "e2e": "mocha ./e2e/**/*.test.js --require=esm"
+    "e2e": "mocha ./e2e/**/*.test.js --require=esm --timeout=10000"
   },
   "keywords": [
     "productivity"
@@ -24,12 +25,18 @@
   "homepage": "https://github.com/asartalo/diligence#readme",
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-mocha": "^6.1.1",
+    "eslint-watch": "^6.0.1",
     "mocha": "^6.2.1",
     "nyc": "^14.1.1",
     "selenium-standalone": "^6.16.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "dependencies": {
+    "core-util-is": "^1.0.2",
     "esm": "^3.2.25"
   }
 }

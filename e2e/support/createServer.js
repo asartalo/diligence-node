@@ -1,15 +1,15 @@
 import http from 'http';
 
-export function createServer(port) {
-  const server = http.createServer(function (req, res) {
+function createServer(port) {
+  const server = http.createServer((req, res) => {
     const body = '<html><body><p>This page is just used to obtain root path</p></body></html>';
-    const content_length = body.length;
+    const contentLength = body.length;
     res.writeHead(
       200,
       {
-        'Content-Length': content_length,
-        'Content-Type': 'text/html'
-      }
+        'Content-Length': contentLength,
+        'Content-Type': 'text/html',
+      },
     );
     res.end(body);
   });
@@ -27,3 +27,4 @@ export function createServer(port) {
   };
 }
 
+export default createServer;
