@@ -17,6 +17,7 @@ module.exports = {
   },
   rules: {
     'mocha/no-mocha-arrows': 'off',
+    'no-underscore-dangle': 'off',
     'arrow-parens': ['error', 'as-needed'],
     'no-plusplus': ["error", { "allowForLoopAfterthoughts": true }],
   },
@@ -46,6 +47,14 @@ module.exports = {
         'no-console': 'off',
         'import/no-extraneous-dependencies': 'off',
       },
+    },
+    {
+      files: [
+        './src/tools/**/*.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+      }
     },
     {
       files: [

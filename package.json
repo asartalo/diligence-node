@@ -2,19 +2,23 @@
   "name": "diligence",
   "version": "0.1.0",
   "description": "Personal productivity",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "mocha ./src/**/*.test.js --require=esm",
-    "test-watch": "mocha --watch ./src/**/*.test.js --require=esm",
+    "test-single": "_mocha --require esm --require=mocha-colors.js",
+    "test": "nyc _mocha --reporter=dot --require=mocha-colors.js ./src/**/*.test.js",
+    "test-watch": "_mocha --watch --require esm --require=mocha-colors.js ./src/**/*.test.js",
+    "dev": "node --require=esm ./dev.js",
+    "lint": "eslint src/",
+    "build": "npm run lint && npm run test",
     "install-selenium": "selenium-standalone install",
     "selenium-start": "selenium-standalone start",
-    "e2e": "mocha ./e2e/**/*.test.js --require=esm --timeout=10000"
+    "e2e": "_mocha ./e2e/**/*.test.js --require=esm --require=mocha-colors.js --timeout=10000"
   },
+  "license": "MIT",
   "keywords": [
     "productivity"
   ],
   "author": "Wayne Duran",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/asartalo/diligence.git"
@@ -22,21 +26,23 @@
   "bugs": {
     "url": "https://github.com/asartalo/diligence/issues"
   },
-  "homepage": "https://github.com/asartalo/diligence#readme",
+  "homepage": "https://github.com/asartalo/diligence",
+  "esm": {
+    "cjs": true
+  },
   "devDependencies": {
     "chai": "^4.2.0",
+    "chokidar": "^3.2.3",
+    "clear": "^0.1.0",
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-mocha": "^6.1.1",
-    "eslint-watch": "^6.0.1",
-    "mocha": "^6.2.1",
+    "esm": "^3.2.25",
+    "mocha": "^6.2.2",
+    "node-notifier": "^6.0.0",
     "nyc": "^14.1.1",
     "selenium-standalone": "^6.16.0",
-    "selenium-webdriver": "^4.0.0-alpha.5"
-  },
-  "dependencies": {
-    "core-util-is": "^1.0.2",
-    "esm": "^3.2.25"
+    "shell-exec": "^1.0.2"
   }
 }
