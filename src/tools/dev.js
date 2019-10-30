@@ -1,8 +1,8 @@
 /* eslint no-console: "off" */
 import chokidar from 'chokidar';
 import notifier from 'node-notifier';
-import shellExec from 'shell-exec';
 import clear from 'clear';
+import shellRunner from './shell-runner';
 
 import debounced from './debounced';
 import {
@@ -48,10 +48,11 @@ function stepTitle(title) {
 
 function lintFiles() {
   stepTitle('Linting files...');
-  return shellExec(
+  return shellRunner(
     `${binDir}/eslint ${srcDir}`,
     { stdio: 'inherit' },
   )
+    .run()
     .then(logShell)
     .then(sendLintNotification)
     .then(({ code }) => {
@@ -92,19 +93,19 @@ async function runTests(path) {
     if (path) {
       stepTitle('Running individual test');
       console.log(`File: ${path}`);
-      const { code } = await shellExec(
+      const { code } = await shellRunner(
         `npm run test-single ${path}`,
         { stdio: 'inherit' },
-      ).then(logShell);
+      ).run().then(logShell);
       if (code !== 0) {
         throw Error('Test failed');
       }
     }
     stepTitle('Running all unit tests');
-    const { code } = await shellExec(
+    const { code } = await shellRunner(
       'npm run test',
       { stdio: 'inherit' },
-    ).then(logShell);
+    ).run().then(logShell);
 
     if (code !== 0) {
       throw Error('Some tests failed');
