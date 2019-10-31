@@ -1,15 +1,16 @@
+/* eslint prefer-arrow-callback: "off" */
 import { expect } from 'chai';
 import XtTester from './support/XtTester';
 
 describe('Diligence smoke test', () => {
   let tester;
 
-  before(() => {
+  before(XtTester.wrap(() => {
     tester = new XtTester();
     return tester.start();
-  });
+  }));
 
-  after(() => tester.stop());
+  after(XtTester.wrap(() => tester.stop()));
 
   it('is actually loaded', () => tester.run(async ({ find }) => {
     const h1 = await find('h1');

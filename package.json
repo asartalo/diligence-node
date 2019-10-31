@@ -12,7 +12,8 @@
     "build": "npm run lint && npm run test",
     "install-selenium": "selenium-standalone install",
     "selenium-start": "selenium-standalone start",
-    "e2e": "_mocha ./e2e/**/*.test.js --require=esm --require=mocha-colors.js --timeout=10000"
+    "e2e-single": "_mocha --require esm --require=mocha-colors.js --timeout=10000",
+    "e2e": "_mocha --require esm --require=mocha-colors.js --timeout=1000 ./e2e/**/*.test.js"
   },
   "license": "MIT",
   "keywords": [
@@ -44,6 +45,7 @@
     "mocha": "^6.2.2",
     "node-notifier": "^6.0.0",
     "nyc": "^14.1.1",
-    "selenium-standalone": "^6.16.0"
+    "selenium-standalone": "^6.16.0",
+    "selenium-webdriver": "^4.0.0-alpha.5"
   }
 }

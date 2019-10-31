@@ -34,7 +34,7 @@ async function firefox({ selenium, server, extension }) {
     homeUrl,
     driver,
     find: selector => driver.findElement(By.css(selector)),
-    stop: (async () => driver.quit()),
+    stop: (() => driver.quit()),
   };
 }
 

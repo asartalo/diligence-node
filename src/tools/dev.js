@@ -1,7 +1,5 @@
 /* eslint no-console: "off" */
-import chokidar from 'chokidar';
 import notifier from 'node-notifier';
-import clear from 'clear';
 import { promises as fsp } from 'fs';
 import shellRunner from './shell-runner';
 import readFile from './read-file';
@@ -9,24 +7,16 @@ import zipper from './zipper';
 
 import debounced from './debounced';
 import {
-  rootDir,
   binDir,
   srcDir,
-  buildDir,
+  e2eDir,
   srcExtensionDir,
   toolsDir,
+  e2eBuildDir,
+  e2eXpi,
+  releaseDir,
+  releaseXpi,
 } from './paths';
-
-const e2eBuildDir = `${buildDir}/e2e`;
-const e2eXpi = `${buildDir}/e2e.xpi`;
-
-const ignorePaths = [
-  `${rootDir}/node_modules/**`,
-  `${rootDir}/coverage/**`,
-  `${buildDir}/**`,
-  '**/.git/**',
-  '.DS_Store',
-];
 
 const log = console.log.bind(console);
 const errLog = console.error.bind(console);
@@ -58,7 +48,7 @@ function stepTitle(title) {
 function lintFiles() {
   stepTitle('Linting files...');
   return shellRunner(
-    `${binDir}/eslint ${srcDir}`,
+    `${binDir}/eslint ${srcDir} ${e2eDir}`,
     { stdio: 'inherit' },
   )
     .run()
@@ -164,30 +154,56 @@ async function compileForE2E() {
   console.log(`Extension has been compiled to "${e2eXpi}"`);
 }
 
+async function compileForRelease() {
+  stepTitle('Compiling files for release');
+
+  // Cleanup e2e dir
+  await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
+  // Copy src contents
+  await shellRunner(`cp -R "${srcExtensionDir}/" "${releaseDir}/"`).run();
+  // Remove test files
+  await shellRunner(`rm  "${releaseDir}"/**/*.test.js`).run();
+
+  await zipper(e2eBuildDir, releaseXpi);
+  console.log(`Extension has been compiled to "${releaseXpi}"`);
+}
+
+async function runE2E() {
+  await compileForE2E();
+  stepTitle('Running end-to-end tests');
+  const { code } = await shellRunner('npm run e2e', { stdio: 'inherit' }).run();
+  return code === 0;
+}
+
+function isE2EFile(filePath) {
+  return filePath && filePath.includes(e2eDir);
+}
+
 async function devPipeline(path) {
   const { testFile } = getFilesFromPath(path);
 
-  clear();
   stepCount = 0;
+  let e2eSucceeded = false;
 
   try {
     await debouncedLintFiles(path);
-    const testsSucceeded = await runTests(testFile);
+    let testsSucceeded = true;
+    if (!isE2EFile(path)) {
+      testsSucceeded = await runTests(testFile);
+    }
+
     if (testsSucceeded) {
-      compileForE2E();
+      e2eSucceeded = await runE2E();
+    }
+
+    if (e2eSucceeded) {
+      compileForRelease();
     }
   } catch (e) {
     errLog(e);
   }
 }
 
-// Watch for changes in the src path and compile
-chokidar.watch(srcDir, {
-  ignoreInitial: true,
-  ignored: ignorePaths,
-})
-  .on('change', devPipeline)
-  .on('add', devPipeline)
-  .on('add', devPipeline);
-
-devPipeline();
+const args = process.argv.slice(2);
+console.log({ args });
+devPipeline(args[0]);

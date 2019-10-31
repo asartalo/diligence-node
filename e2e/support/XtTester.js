@@ -1,12 +1,14 @@
+/* eslint no-await-in-loop: "off" */
 import path from 'path';
 import createServer from './createServer';
 import firefox from './firefox';
 import chrome from './chrome';
+import { e2eXpi } from '../../src/tools/paths';
 
 class XtTester {
   constructor() {
     this.server = createServer(3939);
-    this.extension = path.resolve('/Users/wayne/Projects/Diligence/src/diligence/build/diligence.xpi');
+    this.extension = path.resolve(e2eXpi);
     this.selenium = 'http://localhost:4444/wd/hub';
     this.browsers = [];
   }
@@ -24,13 +26,27 @@ class XtTester {
     return 'DONE';
   }
 
-  stop() {
+  async stop() {
+    console.log('Stopping everything');
     this.server.stop();
     return Promise.all(this.browsers.map(browser => browser.stop()));
   }
 
+  static wrap(fn) {
+    if (fn.length > 0) {
+      return function (done) {
+        this.timeout(10000);
+        return fn(done);
+      };
+    }
+    return function () {
+      this.timeout(10000);
+      return fn();
+    };
+  }
+
   run(fn) {
-    return Promise.all(this.browsers.map(browser => fn(browser)));
+    return Promise.all(this.browsers.map(fn));
   }
 }
 
