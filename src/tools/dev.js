@@ -2,7 +2,10 @@
 import chokidar from 'chokidar';
 import notifier from 'node-notifier';
 import clear from 'clear';
+import { promises as fsp } from 'fs';
 import shellRunner from './shell-runner';
+import readFile from './read-file';
+import zipper from './zipper';
 
 import debounced from './debounced';
 import {
@@ -10,7 +13,12 @@ import {
   binDir,
   srcDir,
   buildDir,
+  srcExtensionDir,
+  toolsDir,
 } from './paths';
+
+const e2eBuildDir = `${buildDir}/e2e`;
+const e2eXpi = `${buildDir}/e2e.xpi`;
 
 const ignorePaths = [
   `${rootDir}/node_modules/**`,
@@ -30,6 +38,7 @@ function sendLintNotification(input) {
   }
   return input;
 }
+
 function logShell(input) {
   log(input.stdout);
   return input;
@@ -66,6 +75,10 @@ function lintFiles() {
 const debouncedLintFiles = debounced(lintFiles, 100);
 
 function getFilesFromPath(path) {
+  if (!path) {
+    return {};
+  }
+
   let testFile; let
     jsFile;
   const testFileMatch = path.match(/^(.+)\.test.js$/);
@@ -89,8 +102,16 @@ function getFilesFromPath(path) {
 
 async function runTests(path) {
   let success = true;
+
+  let testFileExists = true;
   try {
-    if (path) {
+    await fsp.access(path);
+  } catch (e) {
+    testFileExists = false;
+  }
+
+  try {
+    if (path && testFileExists) {
       stepTitle('Running individual test');
       console.log(`File: ${path}`);
       const { code } = await shellRunner(
@@ -100,6 +121,8 @@ async function runTests(path) {
       if (code !== 0) {
         throw Error('Test failed');
       }
+    } else {
+      console.log('No test file found for current file');
     }
     stepTitle('Running all unit tests');
     const { code } = await shellRunner(
@@ -119,26 +142,26 @@ async function runTests(path) {
   return success;
 }
 
-async function compileToDist() {
-  stepTitle('Compiling files for distribution');
-  // return new Promise((resolve, reject) => {
-  //   glob(
-  //     `${srcDir}/**/!(*.test.js)`,
-  //     { nodir: true },
-  //     (err, files) => {
-  //       if (err) {
-  //         reject(err);
-  //       } else {
-  //         Promise.all(
-  //           files.map(file => compileFileToDist(file)),
-  //         ).then(result => {
-  //           console.log('Compilation done.');
-  //           resolve(result);
-  //         });
-  //       }
-  //     },
-  //   );
-  // });
+async function compileForE2E() {
+  stepTitle('Compiling files for end-to-end tests');
+
+  // Cleanup e2e dir
+  await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
+  // Copy src contents
+  await shellRunner(`cp -R "${srcExtensionDir}/" "${e2eBuildDir}/"`).run();
+  // Remove test files
+  await shellRunner(`rm  "${e2eBuildDir}"/**/*.test.js`).run();
+
+  // Insert end-to-end scripst to content-script
+  const contentScriptFile = `${srcExtensionDir}/content-script.js`;
+  const e2eContentScriptFile = `${e2eBuildDir}/content-script.js`;
+  const e2eScript = await readFile(`${toolsDir}/e2e-helper.js`);
+  const contentScript = await readFile(contentScriptFile);
+  await fsp.writeFile(e2eContentScriptFile, `${e2eScript}\n${contentScript}`);
+
+  // Zip the files and save as build/e2e.zip
+  await zipper(e2eBuildDir, e2eXpi);
+  console.log(`Extension has been compiled to "${e2eXpi}"`);
 }
 
 async function devPipeline(path) {
@@ -150,9 +173,8 @@ async function devPipeline(path) {
   try {
     await debouncedLintFiles(path);
     const testsSucceeded = await runTests(testFile);
-
     if (testsSucceeded) {
-      compileToDist();
+      compileForE2E();
     }
   } catch (e) {
     errLog(e);
@@ -167,3 +189,5 @@ chokidar.watch(srcDir, {
   .on('change', devPipeline)
   .on('add', devPipeline)
   .on('add', devPipeline);
+
+devPipeline();

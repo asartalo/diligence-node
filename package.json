@@ -31,6 +31,8 @@
     "cjs": true
   },
   "devDependencies": {
+    "adm-zip": "^0.4.13",
+    "archiver": "^3.1.1",
     "chai": "^4.2.0",
     "chokidar": "^3.2.3",
     "clear": "^0.1.0",
