@@ -123,11 +123,23 @@ async function runTests(path) {
 }
 
 async function runE2E() {
-  stepTitle('Compiling files for end-to-end tests');
   await compileForE2E();
   stepTitle('Running end-to-end tests');
   const { code } = await shellRunner('npm run e2e', { stdio: 'inherit' }).run();
   return code === 0;
+}
+
+const e2eTimeoutMinutes = 2;
+let e2eTimeout;
+async function runE2EAfterTimeout() {
+  return new Promise(resolve => {
+    clearTimeout(e2eTimeout);
+    log(`Will run end-to-end tests in ${e2eTimeoutMinutes} minutes of inactivity`);
+    e2eTimeout = setTimeout(async () => {
+      resolve(await runE2E());
+      clearTimeout(e2eTimeout);
+    }, 60000 * e2eTimeoutMinutes);
+  });
 }
 
 function isE2EFile(filePath) {
@@ -136,6 +148,7 @@ function isE2EFile(filePath) {
 
 async function devPipeline(path) {
   const { testFile } = getFilesFromPath(path);
+  const isE2E = isE2EFile(path);
 
   stepCount = 0;
   let e2eSucceeded = false;
@@ -143,12 +156,14 @@ async function devPipeline(path) {
   try {
     await debouncedLintFiles(path);
     let testsSucceeded = true;
-    if (!isE2EFile(path)) {
+    if (!isE2E) {
       testsSucceeded = await runTests(testFile);
     }
 
     if (testsSucceeded) {
-      e2eSucceeded = await runE2E();
+      e2eSucceeded = isE2E
+        ? await runE2E()
+        : await runE2EAfterTimeout();
     }
 
     if (e2eSucceeded) {
@@ -161,5 +176,4 @@ async function devPipeline(path) {
 }
 
 const args = process.argv.slice(2);
-log({ args });
 devPipeline(args[0]);
