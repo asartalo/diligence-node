@@ -1,25 +1,15 @@
-/* eslint no-console: "off" */
 import notifier from 'node-notifier';
 import { promises as fsp } from 'fs';
+import { log, errLog } from './loggers';
 import shellRunner from './shell-runner';
-import readFile from './read-file';
-import zipper from './zipper';
+import { compileForE2E, compileForRelease } from './compiler';
 
 import debounced from './debounced';
 import {
   binDir,
   srcDir,
   e2eDir,
-  srcExtensionDir,
-  toolsDir,
-  e2eBuildDir,
-  e2eXpi,
-  releaseDir,
-  releaseXpi,
 } from './paths';
-
-const log = console.log.bind(console);
-const errLog = console.error.bind(console);
 
 function sendLintNotification(input) {
   const { code } = input;
@@ -42,7 +32,7 @@ function stepTitle(title) {
   for (let i = 0, len = step.length; i < len; i++) {
     underline += '=';
   }
-  console.log(`\n${step}\n${underline}\n`);
+  log(`\n${step}\n${underline}\n`);
 }
 
 function lintFiles() {
@@ -59,7 +49,7 @@ function lintFiles() {
         throw Error('Linting errors found');
       }
     })
-    .then(() => console.log('Linting files done.\n\n'));
+    .then(() => log('Linting files done.\n\n'));
 }
 
 const debouncedLintFiles = debounced(lintFiles, 100);
@@ -103,7 +93,7 @@ async function runTests(path) {
   try {
     if (path && testFileExists) {
       stepTitle('Running individual test');
-      console.log(`File: ${path}`);
+      log(`File: ${path}`);
       const { code } = await shellRunner(
         `npm run test-single ${path}`,
         { stdio: 'inherit' },
@@ -112,7 +102,7 @@ async function runTests(path) {
         throw Error('Test failed');
       }
     } else {
-      console.log('No test file found for current file');
+      log('No test file found for current file');
     }
     stepTitle('Running all unit tests');
     const { code } = await shellRunner(
@@ -124,51 +114,16 @@ async function runTests(path) {
       throw Error('Some tests failed');
     }
   } catch (e) {
-    console.log(e.message);
-    console.log(e.stack);
+    log(e.message);
+    log(e.stack);
     success = false;
   }
 
   return success;
 }
 
-async function compileForE2E() {
-  stepTitle('Compiling files for end-to-end tests');
-
-  // Cleanup e2e dir
-  await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
-  // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/" "${e2eBuildDir}/"`).run();
-  // Remove test files
-  await shellRunner(`rm  "${e2eBuildDir}"/**/*.test.js`).run();
-
-  // Insert end-to-end scripst to content-script
-  const contentScriptFile = `${srcExtensionDir}/content-script.js`;
-  const e2eContentScriptFile = `${e2eBuildDir}/content-script.js`;
-  const e2eScript = await readFile(`${toolsDir}/e2e-helper.js`);
-  const contentScript = await readFile(contentScriptFile);
-  await fsp.writeFile(e2eContentScriptFile, `${e2eScript}\n${contentScript}`);
-
-  // Zip the files and save as build/e2e.zip
-  await zipper(e2eBuildDir, e2eXpi);
-  console.log(`Extension has been compiled to "${e2eXpi}"`);
-}
-
-async function compileForRelease() {
-  stepTitle('Compiling files for release');
-
-  // Cleanup e2e dir
-  await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
-  // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/" "${releaseDir}/"`).run();
-  // Remove test files
-  await shellRunner(`rm  "${releaseDir}"/**/*.test.js`).run();
-
-  await zipper(e2eBuildDir, releaseXpi);
-  console.log(`Extension has been compiled to "${releaseXpi}"`);
-}
-
 async function runE2E() {
+  stepTitle('Compiling files for end-to-end tests');
   await compileForE2E();
   stepTitle('Running end-to-end tests');
   const { code } = await shellRunner('npm run e2e', { stdio: 'inherit' }).run();
@@ -197,6 +152,7 @@ async function devPipeline(path) {
     }
 
     if (e2eSucceeded) {
+      stepTitle('Compiling files for release');
       compileForRelease();
     }
   } catch (e) {
@@ -205,5 +161,5 @@ async function devPipeline(path) {
 }
 
 const args = process.argv.slice(2);
-console.log({ args });
+log({ args });
 devPipeline(args[0]);

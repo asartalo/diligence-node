@@ -8,6 +8,7 @@
     "test": "nyc _mocha --reporter=dot --require=mocha-colors.js ./src/**/*.test.js",
     "test-watch": "_mocha --watch --require esm --require=mocha-colors.js ./src/**/*.test.js",
     "dev": "node --require=esm ./dev.js",
+    "compile": "node --require=esm ./compile.js",
     "lint": "eslint src/",
     "build": "npm run lint && npm run test",
     "install-selenium": "selenium-standalone install",

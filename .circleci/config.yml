@@ -45,5 +45,8 @@ jobs:
       # run tests!
       - run: npm run test
 
+      # compile extension for end-to-end testing
+      - run: npm run compile e2e
+
       # run e2e tests
       - run: npm run e2e

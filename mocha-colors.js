@@ -1,4 +1,5 @@
-let colors = require('mocha/lib/reporters/base').colors;
+const { colors } = require('mocha/lib/reporters/base');
+
 const overrides = {
   pass: 36,
   fast: 32,
@@ -7,5 +8,6 @@ const overrides = {
   green: 32,
 };
 
-Object.entries(overrides).forEach(([key, color]) => colors[key] = color);
-
+Object.entries(overrides).forEach(([key, color]) => {
+  colors[key] = color;
+});

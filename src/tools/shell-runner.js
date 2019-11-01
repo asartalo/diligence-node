@@ -1,7 +1,7 @@
 import childProcess from 'child_process';
 
 export default function shellRunner(command = '', options = {}) {
-  let cmd = Array.isArray(command) ? command.join(';') : command;
+  const cmd = Array.isArray(command) ? command.join(';') : command;
   const opts = { stdio: 'pipe', cwd: process.cwd(), ...options };
 
   const shell = process.platform === 'win32'
@@ -12,11 +12,8 @@ export default function shellRunner(command = '', options = {}) {
   function run(...args) {
     return new Promise((resolve, reject) => {
       try {
-        if (args.length > 0) {
-          cmd = `${cmd} ${args.join(' ')}`;
-        }
-        const allArgs = [shell.arg, cmd];
-        child = childProcess.spawn(shell.cmd, allArgs, opts);
+        const actualCommand = args.length > 0 ? `${cmd} ${args.join(' ')}` : cmd;
+        child = childProcess.spawn(shell.cmd, [shell.arg, actualCommand], opts);
       } catch (error) {
         reject(error);
         return;
