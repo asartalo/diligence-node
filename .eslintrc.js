@@ -38,6 +38,17 @@ module.exports = {
     },
     {
       files: [
+        './e2e/**/*.js',
+      ],
+      env: {
+        browser: false,
+      },
+      rules: {
+        'mocha/no-setup-in-describe': "off",
+      },
+    },
+    {
+      files: [
         './e2e/support/**/*.js',
       ],
       env: {
