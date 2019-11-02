@@ -13,15 +13,20 @@ import {
   releaseXpi,
 } from './paths';
 
+function run(cmd) {
+  console.log(`Running command: ${cmd}`);
+  return shellRunner(cmd, { stdio: 'inherit' }).run();
+}
+
 async function compileForE2E() {
   // Cleanup e2e dir
-  await shellRunner(`mkdir -p "${e2eBuildDir}"`).run();
+  await run(`mkdir -p "${e2eBuildDir}"`);
   // Cleanup e2e dir
-  await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
+  await run(`rm -R "${e2eBuildDir}"/*`);
   // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/*" "${e2eBuildDir}/"`).run();
+  await run(`cp -R "${srcExtensionDir}"/* "${e2eBuildDir}/"`);
   // Remove test files
-  await shellRunner(`rm  "${e2eBuildDir}"/**/*.test.js`).run();
+  await run(`rm  "${e2eBuildDir}"/**/*.test.js`);
 
   // Insert end-to-end scripst to content-script
   const contentScriptFile = `${srcExtensionDir}/content-script.js`;
@@ -37,13 +42,13 @@ async function compileForE2E() {
 
 async function compileForRelease() {
   // Create dir
-  await shellRunner(`mkdir -p "${releaseDir}"`).run();
+  await run(`mkdir -p "${releaseDir}"`);
   // Cleanup dir
-  await shellRunner(`rm -R "${releaseDir}/*"`).run();
+  await run(`rm -R "${releaseDir}"/*`);
   // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/*" "${releaseDir}/"`).run();
+  await run(`cp -R "${srcExtensionDir}"/* "${releaseDir}/"`);
   // Remove test files
-  await shellRunner(`rm  "${releaseDir}"/**/*.test.js`).run();
+  await run(`rm  "${releaseDir}"/**/*.test.js`);
 
   await zipper(e2eBuildDir, releaseXpi);
   log(`Extension has been compiled to "${releaseXpi}"`);
