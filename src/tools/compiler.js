@@ -13,6 +13,15 @@ import {
   releaseXpi,
 } from './paths';
 
+console.log({
+  platform: process.platform,
+  srcExtensionDir,
+  toolsDir,
+  e2eBuildDir,
+  e2eXpi,
+  releaseDir,
+  releaseXpi,
+});
 
 async function compileForE2E() {
   // Cleanup e2e dir

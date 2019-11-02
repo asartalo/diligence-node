@@ -14,15 +14,23 @@ function createServer(port) {
     res.end(body);
   });
 
+  let starts = 0;
+
   return {
     url: `http://localhost:${port}/`,
     start: () => {
-      console.log(`Server listening to port ${port}`);
-      server.listen(port);
+      if (starts === 0) {
+        console.log(`Server listening to port ${port}`);
+        server.listen(port);
+      }
+      starts += 1;
     },
     stop: () => {
-      console.log('Server closing...');
-      server.close();
+      starts -= 1;
+      if (starts === 0) {
+        console.log('Server closing...');
+        server.close();
+      }
     },
   };
 }

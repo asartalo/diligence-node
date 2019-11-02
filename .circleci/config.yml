@@ -29,7 +29,7 @@ jobs:
       - run: npm install
 
       # install selenium
-      # - run: npm run install-selenium
+      - run: npm run install-selenium
 
       - save_cache:
           paths:
@@ -46,7 +46,7 @@ jobs:
       - run: npm run test
 
       # compile extension for end-to-end testing
-      # - run: npm run compile e2e
+      - run: npm run compile e2e
 
       # run e2e tests
-      # - run: npm run e2e
+      - run: npm run e2e
