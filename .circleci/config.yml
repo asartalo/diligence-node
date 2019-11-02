@@ -59,6 +59,8 @@ jobs:
             npm run test
             # upload test report to Code Climate using `after-build`
             ./cc-test-reporter after-build --coverage-input-type lcov
+            # send coverage report to coveralls
+            npm run coveralls-report
 
       - run: 
           name: Compile Extension for End-to-End Tests
