@@ -13,23 +13,13 @@ import {
   releaseXpi,
 } from './paths';
 
-console.log({
-  platform: process.platform,
-  srcExtensionDir,
-  toolsDir,
-  e2eBuildDir,
-  e2eXpi,
-  releaseDir,
-  releaseXpi,
-});
-
 async function compileForE2E() {
   // Cleanup e2e dir
   await shellRunner(`mkdir -p "${e2eBuildDir}"`).run();
   // Cleanup e2e dir
   await shellRunner(`rm -R "${e2eBuildDir}/*"`).run();
   // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/" "${e2eBuildDir}/"`).run();
+  await shellRunner(`cp -R "${srcExtensionDir}/*" "${e2eBuildDir}/"`).run();
   // Remove test files
   await shellRunner(`rm  "${e2eBuildDir}"/**/*.test.js`).run();
 
@@ -51,7 +41,7 @@ async function compileForRelease() {
   // Cleanup dir
   await shellRunner(`rm -R "${releaseDir}/*"`).run();
   // Copy src contents
-  await shellRunner(`cp -R "${srcExtensionDir}/" "${releaseDir}/"`).run();
+  await shellRunner(`cp -R "${srcExtensionDir}/*" "${releaseDir}/"`).run();
   // Remove test files
   await shellRunner(`rm  "${releaseDir}"/**/*.test.js`).run();
 
