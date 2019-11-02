@@ -5,8 +5,6 @@
 version: 2
 jobs:
   build:
-    environment:
-      CC_TEST_REPORTER_ID: 
     docker:
       # specify the version you desire here
       - image: circleci/node:12.13-browsers
@@ -49,17 +47,17 @@ jobs:
       - run:
           name: Setup Code Climate test-reporter
           command: |
-          # download test reporter as a static binary
+            # download test reporter as a static binary
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
             chmod +x ./cc-test-reporter
 
       - run: 
           name: Run Unit Tests
           command: |
-          # notify Code Climate of a pending test report using `before-build`
+            # notify Code Climate of a pending test report using `before-build`
             ./cc-test-reporter before-build
             npm run test
-          # upload test report to Code Climate using `after-build`
+            # upload test report to Code Climate using `after-build`
             ./cc-test-reporter after-build --coverage-input-type lcov --exit-c
 
       - run: 
