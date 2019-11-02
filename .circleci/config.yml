@@ -5,6 +5,8 @@
 version: 2
 jobs:
   build:
+    environment:
+      CC_TEST_REPORTER_ID: 
     docker:
       # specify the version you desire here
       - image: circleci/node:12.13-browsers
@@ -29,7 +31,9 @@ jobs:
       - run: npm install
 
       # install selenium
-      - run: npm run install-selenium
+      - run: 
+          name: Selenium Standalone Installation 
+          command: npm run install-selenium
 
       - save_cache:
           paths:
@@ -42,11 +46,28 @@ jobs:
           command: npm run selenium-start
           background: true
 
-      # run tests!
-      - run: npm run test
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+          # download test reporter as a static binary
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
 
-      # compile extension for end-to-end testing
-      - run: npm run compile e2e
+      - run: 
+          name: Run Unit Tests
+          command: |
+          # notify Code Climate of a pending test report using `before-build`
+            ./cc-test-reporter before-build
+            npm run test
+          # upload test report to Code Climate using `after-build`
+            ./cc-test-reporter after-build --coverage-input-type lcov --exit-c
+
+      - run: 
+          name: Compile Extension for End-to-End Tests
+          command: npm run compile e2e
 
       # run e2e tests
-      - run: npm run e2e
+      - run: 
+          name: Run End-to-End Tests
+          command: npm run e2e
+
