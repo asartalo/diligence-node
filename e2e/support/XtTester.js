@@ -19,12 +19,18 @@ class XtTester {
     ))
       .then(browsers => browsers.forEach(
         browser => this.browsers.push(browser),
-      ));
+      ))
+      .then(() => console.log('started'));
   }
 
   stop() {
     this.server.stop();
-    return Promise.all(this.browsers.map(browser => browser.stop()));
+    return Promise.all(this.browsers.map(browser => browser.stop()))
+      .then(() => console.log('stopped'));
+  }
+
+  reset() {
+    return Promise.all(this.browsers.map(browser => browser.reset()));
   }
 
   run(fn) {

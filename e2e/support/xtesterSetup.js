@@ -3,12 +3,15 @@ import { it } from 'mocha';
 import XtTester from './XtTester';
 import createServer from './createServer';
 
-
 function setup() {
   if (!global.server) {
     global.server = createServer(3939);
   }
-  const xtester = new XtTester(global.server);
+
+  if (!global.xtester) {
+    global.xtester = new XtTester(global.server);
+  }
+  const { xtester } = global;
 
   function start() {
     this.timeout(10000);
@@ -22,14 +25,20 @@ function setup() {
     return stopPromise;
   }
 
+  function reset() {
+    this.timeout(10000);
+    xtester.reset();
+  }
+
   function runIt(statement, fn) {
     return it(statement, xtester.run(fn));
   }
 
   return {
+    reset,
+    runIt,
     start,
     stop,
-    runIt,
   };
 }
 

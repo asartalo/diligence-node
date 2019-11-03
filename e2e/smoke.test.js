@@ -1,12 +1,10 @@
 import { expect } from 'chai';
 import setup from './support/xtesterSetup';
 
-const { start, stop, runIt } = setup();
+const { reset, runIt } = setup();
 
 describe('Diligence smoke test', () => {
-  before(start);
-
-  after(stop);
+  before(reset);
 
   runIt('is actually loaded', async ({ find }) => {
     const h1 = await find('h1');

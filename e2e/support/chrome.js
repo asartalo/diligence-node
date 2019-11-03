@@ -28,7 +28,7 @@ async function chrome({ selenium, server, extension }) {
     driver,
     find: selector => driver.findElement(By.css(selector)),
     reset: () => driver.get(homeUrl),
-    stop: (() => driver.quit()),
+    stop: () => driver.quit(),
   };
 }
 

@@ -15,7 +15,7 @@
     "install-selenium": "selenium-standalone install",
     "selenium-start": "selenium-standalone start",
     "e2e-single": "_mocha --require esm --require=mocha-colors.js --timeout=10000",
-    "e2e": "_mocha --require esm --require=mocha-colors.js --timeout=1000 ./e2e/**/*.test.js"
+    "e2e": "_mocha --require esm --file=e2e/support/setup.js --require=mocha-colors.js --timeout=1000 ./e2e/**/*.test.js"
   },
   "license": "MIT",
   "keywords": [

@@ -1,12 +1,10 @@
 import { expect } from 'chai';
 import setup from './support/xtesterSetup';
 
-const { start, stop, runIt } = setup();
+const { reset, runIt } = setup();
 
 describe('First screen', () => {
-  before(start);
-
-  after(stop);
+  before(reset);
 
   runIt('Shows greeting', async ({ find }) => {
     const h1 = await find('h1');
